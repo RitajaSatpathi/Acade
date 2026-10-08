@@ -41,7 +41,10 @@ export function AuthProvider({ children }) {
         .maybeSingle()
 
       if (studentError) {
-        console.error('Error fetching student profile:', studentError.message)
+        console.error(
+          'Error fetching student profile:',
+          studentError.message
+        )
       }
 
       setStudentProfile(sp || null)
@@ -53,7 +56,10 @@ export function AuthProvider({ children }) {
         .maybeSingle()
 
       if (teacherError) {
-        console.error('Error fetching teacher profile:', teacherError.message)
+        console.error(
+          'Error fetching teacher profile:',
+          teacherError.message
+        )
       }
 
       setStudentProfile(tp || null)
@@ -125,7 +131,9 @@ export function AuthProvider({ children }) {
     if (role !== 'student') {
       return {
         data: null,
-        error: new Error('Only student self-registration is allowed.'),
+        error: new Error(
+          'Only student self-registration is allowed.'
+        ),
       }
     }
 
@@ -134,71 +142,39 @@ export function AuthProvider({ children }) {
       password,
       options: {
         data: {
-          full_name: fullName,
+          full_name: fullName.trim(),
           role: 'student',
+          roll_number: extraData.rollNumber?.trim() || '',
+          department: extraData.department || '',
+          academic_year: extraData.academicYear || '',
+          semester: String(extraData.semester || ''),
+          section: extraData.section || '',
+          section_id: extraData.sectionId || '',
+          interests: extraData.interests?.trim() || '',
         },
-        emailRedirectTo: 'http://localhost:5173',
+        emailRedirectTo: 'http://localhost:5173/email-confirmed',
       },
     })
 
     if (error) {
+      console.error('Signup error:', error.message)
       return { data: null, error }
     }
 
-    const userId = data.user?.id
-
-    if (!userId) {
-      return {
-        data,
-        error: new Error('Account could not be created. Please try again.'),
-      }
-    }
-
-    // Email confirmation may prevent Supabase from returning a session.
-    // In that case, the database must securely create the academic
-    // profile through a signup trigger or another trusted server process.
-    if (!data.session) {
+    if (!data.user) {
       return {
         data,
         error: new Error(
-          'Your account was created. Please confirm your email. Your academic profile still needs to be set up before registration is fully complete.'
+          'Account could not be created. Please try again.'
         ),
       }
     }
 
-    const { error: profileError } = await supabase
-      .from('profiles')
-      .insert({
-        id: userId,
-        email: email.trim(),
-        full_name: fullName,
-        role: 'student',
-      })
-
-    if (profileError) {
-      console.error('Error creating profile:', profileError.message)
-      return { data, error: profileError }
+    // The database trigger creates the profiles.
+    // Email confirmation may mean there is no session yet.
+    if (data.session) {
+      await fetchProfile(data.user.id)
     }
-
-    const { error: studentError } = await supabase
-      .from('student_profiles')
-      .insert({
-        user_id: userId,
-        roll_number: extraData.rollNumber,
-        department: extraData.department,
-        academic_year: extraData.academicYear,
-        semester: extraData.semester,
-        section: extraData.section,
-        section_id: extraData.sectionId,
-        interests: extraData.interests || null,
-      })
-
-    if (studentError) {
-      console.error('Error creating student profile:', studentError.message)
-      return { data, error: studentError }
-    }
-
-    await fetchProfile(userId)
 
     return { data, error: null }
   }
@@ -207,7 +183,9 @@ export function AuthProvider({ children }) {
     if (!email || !email.trim()) {
       return {
         data: null,
-        error: new Error('Please enter your email address first.'),
+        error: new Error(
+          'Please enter your email address first.'
+        ),
       }
     }
 
@@ -215,12 +193,15 @@ export function AuthProvider({ children }) {
       type: 'signup',
       email: email.trim(),
       options: {
-        emailRedirectTo: 'http://localhost:5173',
+        emailRedirectTo: 'http://localhost:5173/email-confirmed',
       },
     })
 
     if (error) {
-      console.error('Error resending confirmation:', error.message)
+      console.error(
+        'Error resending confirmation:',
+        error.message
+      )
       return { data: null, error }
     }
 
@@ -228,12 +209,14 @@ export function AuthProvider({ children }) {
   }
 
   const signIn = async (email, password) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
-      password,
-    })
+    const { data, error } =
+      await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      })
 
     if (error) {
+      console.error('Sign-in error:', error.message)
       return { data: null, error }
     }
 

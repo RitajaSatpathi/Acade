@@ -5,6 +5,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 
 import Login from './pages/auth/Login'
 import Register from './pages/auth/Register'
+import EmailConfirmed from './pages/auth/EmailConfirmed'
 
 import StudentDashboard from './pages/student/Dashboard'
 import StudentProfile from './pages/student/Profile'
@@ -52,6 +53,7 @@ export default function App() {
           <Route path="/" element={<RoleRedirect />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/email-confirmed" element={<EmailConfirmed />} />
 
           {/* Student routes */}
           <Route path="/student" element={<ProtectedRoute roles={['student']}><StudentDashboard /></ProtectedRoute>} />
