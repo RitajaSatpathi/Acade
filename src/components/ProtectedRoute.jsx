@@ -6,12 +6,22 @@ export default function ProtectedRoute({ children, roles }) {
   const { user, profile, loading } = useAuth()
   const location = useLocation()
 
-  if (loading) return <LoadingPage message="Loading your dashboard..." />
+  if (loading || (user && !profile)) {
+    return <LoadingPage message="Loading your dashboard..." />
+  }
 
-  if (!user) return <Navigate to="/login" state={{ from: location }} replace />
+  if (!user) {
+    return <Navigate to="/login" state={{ from: location }} replace />
+  }
 
-  if (roles && !roles.includes(profile?.role)) {
-    return <Navigate to={`/${profile?.role}`} replace />
+  if (roles && !roles.includes(profile.role)) {
+    const role = profile.role
+
+    if (['student', 'teacher', 'admin'].includes(role)) {
+      return <Navigate to={`/${role}`} replace />
+    }
+
+    return <Navigate to="/login" replace />
   }
 
   return children
