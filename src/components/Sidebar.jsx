@@ -1,5 +1,7 @@
+
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import * as Icons from 'lucide-react'
 
 const adminNav = [
   { label: 'Dashboard', path: '/admin', icon: 'LayoutDashboard' },
@@ -8,11 +10,7 @@ const adminNav = [
   { label: 'Sections', path: '/admin/sections', icon: 'Layers' },
   { label: 'Subjects', path: '/admin/subjects', icon: 'BookOpen' },
   { label: 'Timetables', path: '/admin/timetables', icon: 'CalendarDays' },
-  { label: 'Assignments', path: '/admin/assignments', icon: 'FileText' },
-  { label: 'Assessments', path: '/admin/assessments', icon: 'ClipboardCheck' },
   { label: 'Announcements', path: '/admin/announcements', icon: 'Megaphone' },
-  { label: 'Reports', path: '/admin/reports', icon: 'BarChart3' },
-  { label: 'Settings', path: '/admin/settings', icon: 'Settings' },
 ]
 
 const teacherNav = [
@@ -38,8 +36,6 @@ const studentNav = [
   { label: 'Announcements', path: '/student/announcements', icon: 'Megaphone' },
 ]
 
-import * as Icons from 'lucide-react'
-
 export default function Sidebar({ collapsed, onToggle }) {
   const { profile, signOut } = useAuth()
   const location = useLocation()
@@ -57,11 +53,13 @@ export default function Sidebar({ collapsed, onToggle }) {
           onClick={onToggle}
         />
       )}
+
       <aside className={`fixed lg:static inset-y-0 left-0 z-40 ${collapsed ? 'w-0 lg:w-20 overflow-hidden' : 'w-64'} bg-gradient-to-b from-primary-700 via-primary-800 to-accent-900 text-white flex flex-col transition-all duration-300 shrink-0`}>
         <div className="flex items-center gap-3 px-4 py-5 border-b border-white/10 shrink-0">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-accent-400 to-primary-400 flex items-center justify-center shrink-0">
             <Icons.GraduationCap className="w-6 h-6 text-white" />
           </div>
+
           {!collapsed && (
             <div className="overflow-hidden">
               <h1 className="font-semibold text-sm leading-tight whitespace-nowrap">Skill Platform</h1>
@@ -74,6 +72,7 @@ export default function Sidebar({ collapsed, onToggle }) {
           {navItems.map((item) => {
             const Icon = Icons[item.icon] || Icons.Circle
             const active = location.pathname === item.path || (item.path !== `/${profile?.role}` && location.pathname.startsWith(item.path))
+
             return (
               <Link
                 key={item.path}
