@@ -95,7 +95,7 @@ export default function Topbar({ onMenuClick }) {
         </div>
       </form>
 
-      {/* Flexible space pushes notification and profile to the right */}
+      {/* Flexible space */}
       <div className="flex-1" />
 
       {/* Notifications */}
@@ -159,7 +159,7 @@ export default function Topbar({ onMenuClick }) {
         )}
       </div>
 
-      {/* Profile */}
+      {/* Profile dropdown */}
       <div className="relative shrink-0" ref={profileRef}>
         <button
           onClick={() => setProfileOpen(!profileOpen)}
@@ -183,7 +183,7 @@ export default function Topbar({ onMenuClick }) {
         </button>
 
         {profileOpen && (
-          <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-200 z-50 animate-slide-up">
+          <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-slate-200 z-50 animate-slide-up">
             <div className="px-4 py-3 border-b border-slate-100">
               <p className="text-sm font-medium text-slate-800">
                 {profile?.full_name}
@@ -195,24 +195,32 @@ export default function Topbar({ onMenuClick }) {
             </div>
 
             <div className="py-1">
+
+              {/* Profile is available only to students and teachers */}
+              {profile?.role !== 'admin' && (
+                <button
+                  onClick={() => {
+                    setProfileOpen(false)
+                    navigate(`/${profile?.role}/profile`)
+                  }}
+                  className="w-full flex items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
+                >
+                  <User className="w-4 h-4" />
+                  Profile
+                </button>
+              )}
+
               <button
                 onClick={() => {
                   setProfileOpen(false)
-                  navigate(`/${profile?.role}/profile`)
+                  signOut()
                 }}
-                className="w-full flex items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
-              >
-                <User className="w-4 h-4" />
-                Profile
-              </button>
-
-              <button
-                onClick={signOut}
                 className="w-full flex items-center gap-2 px-4 py-2 text-sm text-error-600 hover:bg-error-50"
               >
                 <LogOut className="w-4 h-4" />
                 Logout
               </button>
+
             </div>
           </div>
         )}
